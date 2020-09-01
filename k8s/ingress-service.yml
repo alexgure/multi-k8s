@@ -5,9 +5,29 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     ngonx.ingress.kubernetes.io/rewrite-target: /
+	certmanager.k8s.io/cluster-issuer: 'letsencrypt-prod'
+	# this line will enforce users use https
+	nginx.ingress.kubernetes.io/ssl-redirect: 'true'
 spec:
+  tls:
+    - host:
+	  - k8s-multi.com
+      - www.k8s-multi.com
+	  secretName: k8s-multi-com
   rules:
-    - http:
+    - host: k8s-multi.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: client-cluster-ip-service
+              servicePort: 3000
+          - path: /api/
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+    - host: www.k8s-multi.com
+      http:
         paths:
           - path: /
             backend:
